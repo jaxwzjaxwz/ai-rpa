@@ -1,0 +1,87 @@
+--- a/ufo/llm/openai.py
++++ b/ufo/llm/openai.py
+@@ -8,6 +8,7 @@
+ import openai
+ import shutil
+ import sys
++import time
+ import urllib.error
+ import urllib.request
+ from typing import Any, Callable, Dict, List, Literal, Optional, Tuple
+@@ -62,7 +63,7 @@
+         self.model = self.config_llm["API_MODEL"]
+ 
+         # Try to automatically fix some config errors (chat completions only)
+-        if not self.use_responses:
++        if not self.use_responses and self.config_llm.get("JSON_SCHEMA", True):
+             while True:
+                 try:
+                     self.client.beta.chat.completions.parse(
+@@ -132,6 +133,12 @@
+                 "n": 1,
+                 **kwargs,
+             }
++            if self.config_llm.get("FORCE_JSON_OUTPUT", False):
++                base_params["response_format"] = {"type": "json_object"}
++            if self.model.lower() == "glm-4.6v-flash" and self.config_llm.get("DISABLE_MODEL_THINKING", False):
++                base_params["extra_body"] = {"thinking": {"type": "disabled"}}
++            elif self.model.lower() == "qwen3-vl-plus" and self.config_llm.get("DISABLE_MODEL_THINKING", False):
++                base_params["extra_body"] = {"enable_thinking": False}
+ 
+             # Add response format if JSON schema is enabled
+             if self.json_schema_enabled:
+@@ -167,7 +174,22 @@
+                     }
+                 )
+ 
+-            response = self.client.chat.completions.create(**base_params)
++            delays = self.config_llm.get("RATE_LIMIT_BACKOFF", [])
++            for attempt in range(len(delays) + 1):
++                try:
++                    response = self.client.chat.completions.create(**base_params)
++                    break
++                except openai.RateLimitError:
++                    if attempt >= len(delays):
++                        raise
++                    self.logger.warning("Model rate-limited/overloaded; waiting %s seconds before retry", delays[attempt])
++                    time.sleep(delays[attempt])
++            trace_dir = os.environ.get("UFO_TRACE_DIR")
++            if trace_dir and not stream:
++                os.makedirs(trace_dir, exist_ok=True)
++                with open(os.path.join(trace_dir, "model_responses.jsonl"), "a", encoding="utf-8") as trace:
++                    trace.write(json.dumps({"agent": str(self.agent_type), "model": self.model,
++                        "response": response.model_dump()}, ensure_ascii=False) + "\n")
+ 
+             if stream:
+                 collected_content = [""]
+--- a/ufo/utils/__init__.py
++++ b/ufo/utils/__init__.py
+@@ -135,11 +135,27 @@
+     :return: The json object.
+     """
+ 
++    json_string = json_string.strip()
+     # Remove the ```json and ``` at the beginning and end of the string if exists.
+     if json_string.startswith("```json"):
+         json_string = json_string[7:-3]
+ 
+-    return json.loads(json_string)
++    try:
++        parsed = json.loads(json_string)
++    except json.JSONDecodeError:
++        if os.environ.get("UFO_COMPAT_ADAPTER") != "1":
++            raise
++        parsed, end = json.JSONDecoder().raw_decode(json_string.lstrip())
++        if not isinstance(parsed, dict) or json_string.lstrip()[end:].strip() != "}":
++            raise
++        logger.warning("Compatibility adapter: ignored one redundant trailing closing brace; raw response retained.")
++    if os.environ.get("UFO_COMPAT_ADAPTER") == "1" and isinstance(parsed, dict):
++        action = parsed.get("action")
++        status = parsed.get("status")
++        if isinstance(action, dict) and not action.get("status") and status in {"CONTINUE", "FINISH", "ERROR", "PENDING"}:
++            action["status"] = status
++            logger.warning("Compatibility adapter: moved explicit top-level status into action.status; raw response retained.")
++    return parsed
+ 
+ 
+ def is_json_serializable(obj: Any) -> bool:

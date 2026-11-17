@@ -1,0 +1,2 @@
+{"event": "page_view", "route": "/success", "timestamp": "2026-11-13T13:53:43.227777+00:00"}
+{"event": "submission", "route": "/success", "fields": {"name": "UFO Tester", "message": "UFO-20261113_215341_131065_web_success"}, "accepted": true, "http_status": 200, "timestamp": "2026-11-13T13:57:52.121292+00:00"}

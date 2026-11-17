@@ -1,0 +1,20 @@
+{
+  "MAX_STEP": 25,
+  "MAX_ROUND": 1,
+  "MAX_RETRY": 0,
+  "TIMEOUT": 60,
+  "TOP_P": 0.8,
+  "JSON_PARSING_RETRY": 2,
+  "TEMPERATURE": 0.1,
+  "SLEEP_TIME": 3,
+  "SAVE_UI_TREE": true,
+  "LOG_XML": true,
+  "LOG_TO_MARKDOWN": true,
+  "SAVE_FULL_SCREEN": false,
+  "EVA_SESSION": false,
+  "EVA_ROUND": false,
+  "USE_MCP": false,
+  "ENABLED_THIRD_PARTY_AGENTS": [],
+  "SAVE_EXPERIENCE": "always_not",
+  "SAFE_GUARD": true
+}
