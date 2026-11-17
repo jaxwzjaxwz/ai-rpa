@@ -30,3 +30,5 @@
 2. 安装 `requirements-lock.txt` 与 `src/ufo/requirements.txt` 中的依赖。
 3. 复制 `config/model.local.example.json` 为本地 `model.local.json`，填入自己的 API Key；该文件被 `.gitignore` 排除。
 4. 按 `runner/run_case.py` 的说明启动本地测试夹具并执行任务。
+
+最终目标：完成一套能够交付的 AI-RPA 系统。
