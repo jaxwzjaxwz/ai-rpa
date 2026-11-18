@@ -7,7 +7,7 @@
 - 模型：阿里云百炼 `qwen3-vl-plus`。
 - 运行编号：`20261113_215341_131065_web_success`。
 - UFO 结果：`task_succeeded`，退出码 0，6 条操作记录，21 张截图，终端状态 `FINISH`。
-- 独立结果检查：后端收到一次匹配字段的 POST，HTTP 200，`accepted=true`；提交记录保存在 `accepted_submissions.jsonl`。
+- 独立结果检查：后端收到一次匹配字段的 POST，HTTP 200，`accepted=true`；提交记录保存在 `example/web_success_accepted_submissions.jsonl`。
 
 ## 目录说明
 
