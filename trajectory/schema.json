@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Unified GUI trajectory (UFO source)",
+  "type": "object",
+  "required": ["schema_version", "task_id", "source", "status", "steps", "outcome"],
+  "properties": {
+    "schema_version": { "type": "string" },
+    "task_id": { "type": "string" },
+    "source": { "enum": ["ufo", "demo", "manual"] },
+    "case": { "type": "string" },
+    "app": { "type": "string" },
+    "request": { "type": "string" },
+    "expected": { "enum": ["success", "failure"] },
+    "created_at": { "type": "string" },
+    "status": { "enum": ["success", "failed", "unknown"] },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["step_id", "action", "pre_img", "post_img"],
+        "properties": {
+          "step_id": { "type": "integer", "minimum": 1 },
+          "agent": { "type": ["string", "null"] },
+          "agent_status": { "type": ["string", "null"] },
+          "application": { "type": ["string", "null"] },
+          "action": {
+            "type": "object",
+            "properties": {
+              "functions": { "type": "array", "items": { "type": "string" } },
+              "calls": { "type": "array" },
+              "arguments": { "type": "array" },
+              "targets": { "type": "array" }
+            }
+          },
+          "action_status": { "type": ["string", "null"] },
+          "result_text": { "type": ["string", "null"] },
+          "pre_img": { "type": "string" },
+          "post_img": { "type": "string" },
+          "raw_status": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "outcome": {
+      "type": "object",
+      "properties": {
+        "task_success": { "type": ["boolean", "null"] },
+        "status": { "type": ["string", "null"] },
+        "exit_code": { "type": ["integer", "null"] },
+        "elapsed_seconds": { "type": ["number", "null"] },
+        "evidence": { "type": "object" }
+      }
+    },
+    "stats": {
+      "type": "object",
+      "properties": {
+        "steps": { "type": "integer" },
+        "screenshots": { "type": "integer" },
+        "missing_screenshots": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}
