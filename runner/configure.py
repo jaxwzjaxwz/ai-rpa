@@ -4,7 +4,8 @@ import os
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-REPO = ROOT.parent / "UFO"
+BASELINE_REPO = ROOT.parent / "UFO"
+REPO = BASELINE_REPO if BASELINE_REPO.is_dir() else ROOT.parent / "src" / "ufo"
 
 def model_environment():
     config = json.loads((ROOT / "model.local.json").read_text(encoding="utf-8-sig"))
